@@ -22,7 +22,7 @@ class AuthController extends Controller
 
         if(auth()->guard()->attempt($request->only('email', 'password'))) {
             $request->session()->regenerate();
-            return redirect()->intended('/dashboard')->with('success', 'Login berhasil');
+            return redirect()->route('dashboard')->with('success', 'Login berhasil');
         }
 
         return back()->withErrors(['email' => 'Email atau password salah'])->onlyInput('email');
@@ -33,17 +33,18 @@ class AuthController extends Controller
         $data = $request->validate([
             'name'     => ['required','string','max:100'],
             'email'    => ['required','email','unique:users,email'],
-            'password' => ['required','confirmed', Password::min(8)->mixedCase()],
+            'password' => ['required','confirmed', Password::min(8)/* ->mixedCase() */],
         ]);
 
         $user = User::create([
             'name'     => $data['name'],
             'email'    => $data['email'],
             'password' => Hash::make($data['password']),
+            'hak_akses' => 'petugas',
         ]);
 
         Auth::login($user);
-        return redirect()->intended('/dashboard')->with('success', 'Registrasi berhasil');
+        return redirect()->route('dashboard')->with('success', 'Registrasi berhasil');
     }
 
 
@@ -53,6 +54,6 @@ class AuthController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return redirect('/login')->with('success', 'Berhasil logout');
+        return redirect('login')->with('success', 'Berhasil logout');
     }
 }

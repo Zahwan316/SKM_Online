@@ -12,14 +12,15 @@ class Pemohon extends Model
         'id_upload',
         'nama_pemohon',
         'nama_pasien',
-        'no_rm_pasien',
+        'no_RMpasien',
         'tempat_lahir_pasien',
         'tanggal_lahir_pasien',
         'tanggal_perawatan_pasien',
-        'jenis_pasien',
+        'jenis_permohonan',
         'no_telepon',
         'status_pemohon',
         'upload',
         'jenis_pengiriman',
+        'alamat_pasien'
     ];
 }

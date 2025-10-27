@@ -17,7 +17,7 @@ class PemohonController extends Controller
         //
         $data = Pemohon::all();
 
-        return view('pemohon.index', compact('data'));
+        return view('admin.pemohon.index', compact('data'));
     }
 
     /**
@@ -26,7 +26,7 @@ class PemohonController extends Controller
     public function create()
     {
         //
-        return view('pemohon.create');
+        return view('admin.pemohon.create');
     }
 
     /**
@@ -37,18 +37,19 @@ class PemohonController extends Controller
         //
         //
         $validate = $request->validate( [
-            'id_upload' => 'required',
+            // 'id_upload' => 'required',
             'nama_pemohon' => 'required|string',
             'nama_pasien' => 'required|string',
-            'no_rm_pasien' => 'required|integer',
+            'no_RMpasien' => 'required|integer',
             'tempat_lahir_pasien' => 'required|string',
             'tanggal_lahir_pasien' => 'required|date',
             'tanggal_perawatan_pasien' => 'required|date',
-            'jenis_pasien' => 'required|string',
-            'no_telepon' => 'required|integer',
+            'jenis_permohonan' => 'required|string',
+            'no_telepon' => 'required|string',
             'status_pemohon' => 'required|string',
             'upload' => 'nullable|mimes:pdf',
             'jenis_pengiriman' => 'required|string',
+            'alamat_pasien' => 'required|string',
         ]);
 
         if($request->hasFile('upload')) {
@@ -56,36 +57,26 @@ class PemohonController extends Controller
             $uploadName = time() . '.' . $upload->getClientOriginalExtension();
             $saveUpload = Upload::create([
                 'upload' => $uploadName,
-                'user_id' => auth()->guard()->user()->id
+                'id_user' => auth()->guard()->user()->id
             ]);
             $upload->move(public_path('upload'), $uploadName);
             $insert = Pemohon::create([
                 'nama_pemohon' => $request->nama_pemohon,
                 'nama_pasien' => $request->nama_pasien,
-                'id_upload' => $request->id_upload,
-                'no_rm_pasien' => $request->no_rm_pasien,
+                'id_upload' => $saveUpload->id,
+                'no_RMpasien' => $request->no_RMpasien,
                 'tempat_lahir_pasien' => $request->tempat_lahir_pasien,
                 'tanggal_lahir_pasien' => $request->tanggal_lahir_pasien,
                 'tanggal_perawatan_pasien' => $request->tanggal_perawatan_pasien,
-                'jenis_pasien' => $request->jenis_pasien,
+                'jenis_permohonan' => $request->jenis_permohonan,
                 'no_telepon' => $request->no_telepon,
                 'status_pemohon' => $request->status_pemohon,
-                'jenis_pengiriman' => $request->jenis_pengiriman
+                'jenis_pengiriman' => $request->jenis_pengiriman,
+                'alamat_pasien' => $request->alamat_pasien,
             ]);
         }
         else{
-            $insert = Pemohon::create([
-                'nama_pemohon' => $request->nama_pemohon,
-                'nama_pasien' => $request->nama_pasien,
-                'no_rm_pasien' => $request->no_rm_pasien,
-                'tempat_lahir_pasien' => $request->tempat_lahir_pasien,
-                'tanggal_lahir_pasien' => $request->tanggal_lahir_pasien,
-                'tanggal_perawatan_pasien' => $request->tanggal_perawatan_pasien,
-                'jenis_pasien' => $request->jenis_pasien,
-                'no_telepon' => $request->no_telepon,
-                'status_pemohon' => $request->status_pemohon,
-                'jenis_pengiriman' => $request->jenis_pengiriman
-            ]);
+            $insert = Pemohon::create($validate);
         }
 
 
@@ -101,7 +92,7 @@ class PemohonController extends Controller
         //
         $data = Pemohon::find($id);
 
-        return view('pemohon.show', compact('data'));
+        return view('admin.pemohon.show', compact('data'));
     }
 
     /**
@@ -112,7 +103,7 @@ class PemohonController extends Controller
         //
         $data = Pemohon::find($id);
 
-        return view('pemohon.edit', compact('data'));
+        return view('admin.pemohon.edit', compact('data'));
     }
 
     /**
@@ -130,10 +121,11 @@ class PemohonController extends Controller
             'tanggal_lahir_pasien' => 'nullable|date',
             'tanggal_perawatan_pasien' => 'nullable|date',
             'jenis_pasien' => 'nullable|string',
-            'no_telepon' => 'nullable|integer',
+            'no_telepon' => 'nullable|string',
             'status_pemohon' => 'nullable|string',
             'upload' => 'nullable|mimes:pdf',
             'jenis_pengiriman' => 'nullable|string',
+            'alamat_pasien' => 'nullable|string'
         ]);
 
 
@@ -170,7 +162,8 @@ class PemohonController extends Controller
                 'jenis_pasien' => $request->jenis_pasien,
                 'no_telepon' => $request->no_telepon,
                 'status_pemohon' => $request->status_pemohon,
-                'jenis_pengiriman' => $request->jenis_pengiriman
+                'jenis_pengiriman' => $request->jenis_pengiriman,
+                'alamat_pasien' => $request->alamat_pasien,
             ]);
         }
 
@@ -191,5 +184,10 @@ class PemohonController extends Controller
         catch(\Exception $e){
             return redirect()->route('pemohon.index')->with('error', 'Data Gagal Dihapus');
         }
+    }
+
+    public function searchKodePermohonan(Request $request){
+        $data = Pemohon::where('kode_permohonan', 'like', '%' . $request->keyword . '%')->get();
+        return response()->json($data);
     }
 }
